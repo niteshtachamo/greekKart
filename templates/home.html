@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- ========================= SECTION MAIN ========================= -->
+<section class="section-intro padding-y-sm">
+    <div class="container">
+        <div class="intro-banner-wrap rounded">
+            {% comment %} <img src="{% static 'images/banners/1.jpg' %}" class="img-fluid rounded"> {% endcomment %}
+            <div class="main-title center">
+                <h1 class="title">Banner</h1>
+                <p>Lorem ipsum dolor sit amet.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================= SECTION PRODUCTS ========================= -->
+<section class="section-name padding-y-sm">
+    <div class="container">
+
+        <header class="section-heading">
+            <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
+            <h3 class="section-title">Popular products</h3>
+        </header>
+
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                    <div class="col-md-3">
+                        <div class="card card-product-grid">
+                            <a href="{{ product.get_url }}" class="img-wrap">
+                                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                            </a>
+                            <figcaption class="info-wrap">
+                                <a href="{{ product.get_url }}" class="title">
+                                    {{ product.product_name }}
+                                </a>
+                                <div class="price mt-1">Rs: {{ product.price }}</div>
+                            </figcaption>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No products available.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
