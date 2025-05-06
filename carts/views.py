@@ -14,6 +14,7 @@ def add_cart(request, product_id):
     product = Product.objects.get(id=product_id)
     product_variation = []
 
+    # Check if variations are provided in the POST request and append them
     if request.method == 'POST':
         for item in request.POST:
             key = item
@@ -28,59 +29,43 @@ def add_cart(request, product_id):
             except Variation.DoesNotExist:
                 pass
 
-    try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-    except Cart.DoesNotExist:
-        cart = Cart.objects.create(cart_id=_cart_id(request))
-    cart.save()
+    # Get or create a cart for the session
+    cart, created = Cart.objects.get_or_create(cart_id=_cart_id(request))
 
-    is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
+    # Check if the product with variations already exists in the cart
+    cart_item_qs = CartItem.objects.filter(product=product, cart=cart)
 
-    if is_cart_item_exists:
-        cart_item_qs = CartItem.objects.filter(product=product, cart=cart)
-        ex_var_list = []
-        id_list = []
-
-        for item in cart_item_qs:
-            existing_variation = item.variations.all()
-            ex_var_list.append(list(existing_variation))
-            id_list.append(item.id)
-
-        if product_variation in ex_var_list:
-            index = ex_var_list.index(product_variation)
-            item_id = id_list[index]
-            item = CartItem.objects.get(product=product, id=item_id)
+    # Check if there is already a cart item with the same product and variations
+    for item in cart_item_qs:
+        existing_variation = item.variations.all()
+        # If the product and variations match, increase quantity
+        if set(existing_variation) == set(product_variation):
             item.quantity += 1
             item.save()
-            return redirect('cart')
+            return redirect('cart')  # Redirect to cart page
 
-        else:
-            item = CartItem.objects.create(product=product, cart=cart, quantity=1)
-            if len(product_variation) > 0:
-                item.variations.clear()
-                item.variations.add(*product_variation)
-            item.save()
-            return redirect('cart')
+    # If no matching cart item found, create a new one
+    cart_item = CartItem.objects.create(
+        product=product,
+        quantity=1,
+        cart=cart,
+    )
+    if len(product_variation) > 0:
+        cart_item.variations.clear()
+        cart_item.variations.add(*product_variation)
+    cart_item.save()
 
-    else:
-        cart_item = CartItem.objects.create(
-            product=product,
-            quantity=1,
-            cart=cart,
-        )
-        if len(product_variation) > 0:
-            cart_item.variations.clear()
-            cart_item.variations.add(*product_variation)
-        cart_item.save()
-        return redirect('cart')
+    return redirect('cart')  # Redirect to cart page # Redirect to cart page
 
-def remove_cart(request, product_id,cart_item_id):
+
+
+def remove_cart(request, product_id, cart_item_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
     product = get_object_or_404(Product, id=product_id)
     try:
-        cart_item =CartItem.objects.get(product=product,cart=cart,id=cart_item_id)
-        if cart_item.quantity>1:
-            cart_item.quantity -=1
+        cart_item = CartItem.objects.get(product=product, cart=cart, id=cart_item_id)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
             cart_item.save()
         else:
             cart_item.delete()
@@ -88,10 +73,10 @@ def remove_cart(request, product_id,cart_item_id):
         pass
     return redirect('cart')
 
-def remove_cart_item(request, product_id,cart_item_id):
+def remove_cart_item(request, product_id, cart_item_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
     product = get_object_or_404(Product, id=product_id)
-    cart_item=CartItem.objects.get(product=product,cart=cart,id=cart_item_id)
+    cart_item = CartItem.objects.get(product=product, cart=cart, id=cart_item_id)
     cart_item.delete()
     return redirect('cart')
 

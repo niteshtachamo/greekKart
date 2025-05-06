@@ -54,12 +54,14 @@
 
     <script type="text/javascript">
       $(document).ready(function () {
-        // jQuery code here
+        setTimeout(function () {
+          $('#message').fadeOut('slow');
+        }, 4000);
       });
     </script>
   </head>
   <body>
-    {% include "includes/navbar.html" %} {% block content %} {% endblock %} 
-    {% include "includes/footer.html" %}
+    {% include "includes/navbar.html" %} {% block content %} {% endblock %}
+     {%include "includes/footer.html" %}
   </body>
 </html>
