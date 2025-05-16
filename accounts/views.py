@@ -109,7 +109,7 @@ def login(request):
                 params=dict(x.split('=') for x in query.split('&'))
                 if 'next' in params:
                     return redirect(params['next'])
-                return redirect(nextPage)
+                return redirect("nextPage")
             except:
                 pass
                 return redirect('dashboard')

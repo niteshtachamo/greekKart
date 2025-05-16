@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+ 
+        <h3 class="mb-10 text-center"> Review Your Order</h3>
+            <div class="row">
+                <aside class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            Billing Address
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-0">Name: {{ order.full_name }} </p>
+                            <p class="card-text mb-0">Address: {{ order.full_address }} </p>
+                            <p class="card-text mb-0">Email: {{ order.email }} </p>
+                            <p class="card-text mb-0">Phone Number: {{ order.phone }} </p>
+                            <p class="card-text mb-0">City/State: {{ order.city }}/{{ order.state }}</p>
+                            <p class="card-text mb-0">Country: {{ order.country }} </p>
+                            {% if order.order_note %}
+                            <b>Order Note: {{order.order_note}}</b>
+                            {% endif %}
+                        </div>
+                        </div>
+                        <div class="card">
+                        <div class="card-header">
+                            Payment Method
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Paypal</p>
+                            <p class="card-text">Stripe</p>
+                            <p class="card-text">Khalti</p>
+                        </div>
+                        </div>
+                        <div class="card">
+                        <div class="card-header">
+                            Review Products
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless align-middle">
+                            <thead class="text-muted">
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col" class="text-center">Qty</th>
+                                    <th scope="col" class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cart_item in cart_items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ cart_item.product.images.url }}" class="rounded me-2" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <div>
+                                                <a href="{{ cart_item.product.get_url }}" class="text-dark fw-semibold">{{ cart_item.product.product_name }}</a><br>
+                                                <small class="text-muted">
+                                                    {% for item in cart_item.variations.all %}
+                                                        {{ item.variation_category|capfirst }}: {{ item.variation_value|capfirst }}<br>
+                                                    {% endfor %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ cart_item.quantity }}</td>
+                                    <td class="text-end">
+                                        <div>
+                                            <strong>Rs. {{ cart_item.sub_total }}</strong><br>
+                                            <small class="text-muted">Rs. {{ cart_item.product.price }} each</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                        </div>
+                </aside>
+
+                <aside class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <dl class="dlist-align">
+                                <dt>Total Price:</dt>
+                                <dd class="text-right">Rs. {{ total }}</dd>
+                            </dl>
+                            <dl class="dlist-align">
+                                <dt>Tax:</dt>
+                                <dd class="text-right">Rs. {{ tax }}</dd>
+                            </dl>
+                            <dl class="dlist-align">
+                                <dt>Final Price:</dt>
+                                <dd class="text-right text-dark b"><strong>Rs. {{ grand_total }}</strong></dd>
+                            </dl>
+                            <hr>
+                            <p class="text-center mb-3">
+                                <img src="{% static './images/misc/payments.png' %}" height="26">
+                            </p>
+                            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">Make Payment</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+    </div>
+</section>
+{% endblock %}
