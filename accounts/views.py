@@ -7,6 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.conf import settings
 from django.core.mail import send_mail
+from carts.models import Cart,CartItem
+from carts.views import _cart_id
+import requests
 
 
 # verification email
@@ -64,18 +67,58 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 def login(request):
-    if request.method=="POST":
-        email=request.POST['email']
-        password=request.POST['password']
+    if request.method == "POST":
+        email = request.POST['email']
+        password = request.POST['password']
         user = auth.authenticate(username=email, password=password)
+
         if user is not None:
-            auth.login(request,user)
-            # messages.success(request,"You are now login in")
-            return redirect('dashboard')
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                cart_items = CartItem.objects.filter(cart=cart)
+
+                if cart_items.exists():
+                    # Get existing cart items of the logged-in user
+                    user_cart_items = CartItem.objects.filter(user=user)
+                    user_variation_list = []
+
+                    for item in user_cart_items:
+                        variations = item.variations.all()
+                        user_variation_list.append(list(variations))
+
+                    # Assign the cart items from session to the logged-in user
+                    for item in cart_items:
+                        item_variations = list(item.variations.all())
+                        if item_variations in user_variation_list:
+                            index = user_variation_list.index(item_variations)
+                            existing_item = user_cart_items[index]
+                            existing_item.quantity += item.quantity
+                            existing_item.save()
+                            item.delete()  # remove duplicate
+                        else:
+                            item.user = user
+                            item.save()
+
+            except Cart.DoesNotExist:
+                pass
+
+            auth.login(request, user)
+            url=request.META.get('HTTP_REFERER')
+            try:
+                query=requests.utils.urlparse(url).query
+                params=dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    return redirect(params['next'])
+                return redirect(nextPage)
+            except:
+                pass
+                return redirect('dashboard')
+
         else:
-            messages.error(request,"Invalid email and password")
+            messages.error(request, "Invalid email or password")
             return redirect('login')
-    return render(request,'accounts/login.html')
+
+    return render(request, 'accounts/login.html')
 
 @login_required(login_url='login')
 def logout(request):
