@@ -156,3 +156,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tachamonitesh@gmail.com'
 EMAIL_HOST_PASSWORD = 'ueqh itrz fsrq ezvr'
+
+
+# khalti live secret key
+KHALTI_SECRET_KEY = "test_secret_key_e78b6608052b4d388f6455ae0df8d9b7"
+STRIPE_SECRET_KEY = "sk_test_51PxYQlEnOIYksbbDrCIR3zYbPabFVEALG8uf4ZbjyFkg18X37AUkxVAROXgvQdGvlzBJqIxJn7847ReTN8Sa0Nrj00oCiKjUdw"
+STRIPE_PUBLISHABLE_KEY="pk_test_51PxYQlEnOIYksbbD5FicExiVYpcnj9OlC1jZZ8sd3XclL55bctKkb2LPG1OKfFXgFxWJaykZ1oZgODcwqN8HfegF00486bu1WG"
+

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+    {% autoescape on %}
+    <h2>Order Confirmation</h2>
+    <p>Dear {{ user.first_name }},</p>
+    <p>Thank you for your order #{{ order.order_number }}!</p>
+    
+    <p>We'll notify you when your order ships.</p>
+    {% endautoescape %}
+</body>
+</html>

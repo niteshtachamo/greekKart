@@ -5,7 +5,7 @@ from store.models import Product,Variation
 # Create your models here.
 class Payment(models.Model):
     user=models.ForeignKey(Account,on_delete=models.CASCADE)
-    payment_id = models.AutoField(primary_key=True)
+    payment_id = models.CharField(primary_key=True)
     payment_method = models.CharField(max_length=100)
     amount_paid=models.CharField(max_length=50)
     status=models.CharField(max_length=50)
@@ -61,9 +61,7 @@ class OrderProduct(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    variations = models.ForeignKey(Variation, on_delete=models.CASCADE)  # For size, color, etc.
-    color = models.CharField(max_length=30, blank=True)
-    size = models.CharField(max_length=10, blank=True)
+    variations = models.ManyToManyField(Variation, blank=True)  # For size, color, etc.
     quantity = models.IntegerField()
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)

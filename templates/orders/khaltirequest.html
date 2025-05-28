@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay with Khalti</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/khalti-checkout-web@latest/dist/khalti-checkout.iffe.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #6b7280, #1f2937);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+        }
+        .btn-primary {
+            background: #8b5cf6;
+            transition: transform 0.2s, background 0.3s;
+        }
+        .btn-primary:hover {
+            background: #a78bfa;
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            border-color: #6b7280;
+            color: #6b7280;
+            transition: transform 0.2s, color 0.3s;
+        }
+        .btn-secondary:hover {
+            color: #4b5563;
+            border-color: #4b5563;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto text-center">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">Your order amount is Rs. {{ order.order_total }}</h3>
+
+        <button id="payment-button" class="btn-primary text-white font-semibold py-3 px-6 rounded-lg mb-4">Pay with Khalti</button>
+        <br>
+        <a href="/" class="btn-secondary font-semibold py-2 px-4 rounded-lg border-2 inline-block">Go to Home page</a>
+    </div>
+
+    <script>
+        var config = {
+            "publicKey": "test_public_key_3349c4f953df407591d450fb1a890d90  ",
+            "productIdentity": "order_{{ order.id }}",
+            "productName": "Order #{{ order.id }}",
+            "productUrl": "http://localhost:8000/",
+            "paymentPreference": [
+                "KHALTI", "MOBILE_BANKING", "EBANKING", "CONNECT_IPS", "SCT"
+            ],
+            "eventHandler": {
+                onSuccess(payload) {
+                    axios.get("/orders/khalti-verify/", {
+                        params: {
+                            "token": payload.token,
+                            "amount": payload.amount,
+                            "order_id": "{{ order.id }}"
+                        }
+                    }).then(function(resp) {
+                        if (resp.data && resp.data.success) {
+                            axios.post("/orders/payments/", {
+                                transID: payload.token,
+                                payment_method: "Khalti",
+                                status: "Completed",
+                                orderID: "{{ order.order_number }}"
+                            }).then(function(response) {
+                                alert("✅ Thank you! Payment and order completed successfully.");
+                                window.location.href = "/";
+                            }).catch(function(error) {
+                                console.error("Error completing order:", error);
+                                alert("Payment was successful, but we couldn't finalize your order. Please contact support.");
+                            });
+                        } else {
+                            console.error("Verification failed:", resp.data ? resp.data.message : "No response data");
+                            alert("❌ Payment verification failed. Please try again or contact support.");
+                        }
+                    }).catch(function(error) {
+                        console.error("Verification error:", error);
+                        alert("Error occurred while verifying payment. Please check your connection and try again.");
+                    });
+                },
+                onError(error) {
+                    console.error("Payment error:", error);
+                    alert("Something went wrong during payment. Please try again.");
+                },
+                onClose() {
+                    console.log('Khalti widget closed');
+                }
+            }
+        };
+
+        var checkout = new KhaltiCheckout(config);
+        var btn = document.getElementById("payment-button");
+        btn.onclick = function () {
+            checkout.show({ amount: {{ order.order_total|floatformat:0 }} * 100 });
+        }
+        {% comment %} window.addEventListener('load', function() {
+             checkout.show({ amount: {{ order.order_total|floatformat:0 }} * 100 });
+        }); {% endcomment %}    
+    </script>
+</body>
+</html>
