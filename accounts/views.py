@@ -1,15 +1,29 @@
-from django.shortcuts import render,redirect
-from .forms import RegistrationForm
-from .models import Account
-from django.contrib import messages,auth
-from django.contrib.auth import logout as auth_logout
+from django.shortcuts import render, redirect
+from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout as auth_logout
 from django.http import HttpResponse
 from django.conf import settings
 from django.core.mail import send_mail
-from carts.models import Cart,CartItem
-from carts.views import _cart_id
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from decimal import Decimal
+
+from accounts.models import UserProfile
+from accounts.forms import UserForm, UserProfileForm
 import requests
+
+from carts.models import Cart, CartItem
+from carts.views import _cart_id
+from orders.models import Order,OrderProduct
+
+from .models import Account, UserProfile
+from .forms import RegistrationForm, UserForm, UserProfileForm
+
 
 
 # verification email
@@ -42,6 +56,12 @@ def register(request):
             user.phone_number = phone_number
             user.is_active = True 
             user.save()
+            
+            # create user profile
+            profile=UserProfile()
+            profile.user_id=user.id
+            profile.profile_picture='default/default-user.png'
+            profile.save()
             
             # user activation
             current_site=get_current_site(request)
@@ -145,7 +165,16 @@ def activate(request,uidb64,token):
     
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request,'accounts/dashboard.html')
+    orders=Order.objects.order_by('-created_at').filter(user_id=request.user.id,is_ordered=True)
+    orders_count=orders.count()
+    userprofile=UserProfile.objects.get(user_id=request.user.id)
+    context={
+        'orders':orders,
+        'orders_count':orders_count,
+        'userprofile':userprofile,
+        }
+    
+    return render(request,'accounts/dashboard.html',context)
 
 
 def forgetpassword(request):
@@ -202,3 +231,125 @@ def resetpassword(request):
             return redirect('resetpassword')
     else:
         return render(request, 'accounts/resetpassword.html')
+    
+    
+@login_required
+
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    context = {
+        'orders': orders
+        }
+    return render(request, 'accounts/my_orders.html', context)
+
+
+@login_required
+
+def edit_profile(request):
+    user = request.user
+    try:
+        profile = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        profile = UserProfile(user=user)
+        profile.save()
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('edit_profile')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = UserProfileForm(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+
+
+@login_required
+def change_password(request):
+    user = request.user
+    profile = UserProfile.objects.get(user=user)
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('change_password')
+
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect('change_password')
+
+        if len(new_password) < 6:
+            messages.error(request, 'Password must be at least 6 characters long.')
+            return redirect('change_password')
+
+        user.set_password(new_password)
+        user.save()
+
+        # Keeps the user logged in after password change
+        # update_session_auth_hash(request, user)
+
+        messages.success(request, 'Your password has been updated successfully.')
+        return redirect('change_password')
+
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = UserProfileForm(instance=profile)
+        context = {
+            'user_form': user_form,
+            'profile_form': profile_form,
+        }
+        return render(request, 'accounts/change_password.html', context)
+    
+from decimal import Decimal
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, order_number=order_id)
+    payment = order.payment
+    order_items = OrderProduct.objects.filter(order=order)
+
+    subtotal = Decimal('0.00')
+    total_tax = Decimal('0.00')
+
+    for item in order_items:
+        price = Decimal(str(item.product_price))
+        quantity = item.quantity
+        item_total = price * quantity
+
+        tax = item_total * Decimal('0.13')  # assuming 13% tax
+
+        subtotal += item_total
+        total_tax += tax
+
+        item.total = item_total + tax
+        item.tax = tax  # set dynamically for template use
+
+    grand_total = subtotal + total_tax
+
+    context = {
+        'order_detail': order_items,
+        'order': order,
+        'payment': payment,
+        'subtotal': subtotal,
+        'total_tax': total_tax,
+        'grand_total': grand_total,
+    }
+
+    return render(request, 'accounts/order_detail.html', context)

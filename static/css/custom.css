@@ -49,20 +49,17 @@
     color: gold !important;
 }
 
-ul.thumb {
+ul.thumb{
     margin: 0 auto;
     padding: 0;
-    display: flex;          /* Makes list items horizontal */
-    gap: 10px;              /* Adds space between thumbnails */
-    justify-content: flex-start;
-    flex-wrap: wrap;        /* Allows wrapping on smaller screens if needed */
+    float: left;
 }
 
-ul.thumb li {
+ul.thumb li{
     list-style: none;
+    margin: 10px ;
 }
-
-ul.thumb li img {
+ul.thumb li img{
     width: 80px;
     height: 80px;
     border: 1px solid grey;

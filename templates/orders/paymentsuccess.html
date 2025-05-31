@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container" style="margin: 0 auto;width: 70%;padding: 50px;background: #f1f1f1;margin-top: 50px;margin-bottom: 50px;">
+<div class="container" style="width: 100%; padding: 50px; background: #f1f1f1; margin-top: 50px; margin-bottom: 50px;">
     <div class="row invoice row-printable">
         <div class="col-md-12">
             <div class="panel panel-default plain" id="dash_0">
@@ -34,9 +34,9 @@
                             </div>
                         </div>
 
-                        <div class="invoice-items mt-4">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
+                        <div class="invoice-items mt-4" style="width: 100%;">
+                            <div class="table-responsive" style="width: 100%;">
+                                <table class="table table-bordered w-100">
                                     <thead>
                                         <tr>
                                             <th class="text-center">Description</th>
@@ -49,7 +49,7 @@
                                         {% for item in ordered_products %}
                                         <tr>
                                             <td>
-                                                {{ item.product.product_name }}
+                                                <strong>{{ item.product.product_name }}</strong>
                                                 {% if item.variations.all %}
                                                     <br>
                                                     <small>

@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Account
 from django.contrib.auth.admin import UserAdmin
+from django.contrib import admin
+from django.utils.html import format_html
+from .models import UserProfile 
 
 class AccountAdmin(UserAdmin):
     list_display = ('email', 'first_name', 'last_name', 'username', 'last_login', 'date_joined', 'is_active')
@@ -17,5 +20,22 @@ class AccountAdmin(UserAdmin):
         ('Permissions', {'fields': ('is_admin', 'is_staff', 'is_active', 'is_superadmin')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+    
+ # or the appropriate import path
+
+class UserProfileAdmin(admin.ModelAdmin):
+    def thumbnail(self, object):
+        try:
+            return format_html(
+                '<img src="{}" width="30" style="border-radius:50%;">', object.profile_picture.url
+            )
+        except ValueError:
+            return "No Image"
+
+    thumbnail.short_description = 'Profile Picture'
+
+    list_display = ('thumbnail', 'address_line_1','address_line_2','user', 'city', 'state', 'country')
+
 
 admin.site.register(Account, AccountAdmin)
+admin.site.register(UserProfile,UserProfileAdmin)

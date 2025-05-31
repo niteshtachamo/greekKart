@@ -19,3 +19,18 @@
 		</section>
 	</div>
 </footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $('.thumbs').click(function(e){
+      e.preventDefault();
+      var newImage = $(this).attr("href");
+      $('.mainImage img').attr('src', newImage);
+    });
+  });
+</script>
+
+
+</body>
+</html>

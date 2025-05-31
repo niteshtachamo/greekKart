@@ -1,11 +1,12 @@
 from django.db import models
 from accounts.models import Account
 from store.models import Product,Variation
+from decimal import Decimal
 
 # Create your models here.
 class Payment(models.Model):
     user=models.ForeignKey(Account,on_delete=models.CASCADE)
-    payment_id = models.CharField(primary_key=True)
+    payment_id = models.CharField(max_length=100, primary_key=True)
     payment_method = models.CharField(max_length=100)
     amount_paid=models.CharField(max_length=50)
     status=models.CharField(max_length=50)
@@ -62,6 +63,7 @@ class OrderProduct(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     variations = models.ManyToManyField(Variation, blank=True)  # For size, color, etc.
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     quantity = models.IntegerField()
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)
