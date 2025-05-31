@@ -1,0 +1,50 @@
+/* radio button hide */
+.rate>input{
+    display: none;
+}
+
+/* radio button show */
+.rate{
+    display: inline-block;
+    border: 0;
+}
+.rate>label{
+    float: right;
+
+}
+
+/* showing stars */
+.rate>label:before{
+    display: inline-block;
+    font-size: 1.1rem;
+    font-family: FontAwesome;
+    content: "\f005";
+    margin: 0;
+    padding: 0.3rem .2rem;
+    cursor: pointer;
+}
+
+.rate .half:before{
+    content: "\f089";
+    position: absolute;
+    padding-right: 0;
+
+}
+
+/* clisk and hover */
+/* Highlight stars when selected */
+.rate > input:checked ~ label:before,
+.rate > input:checked ~ label.half:before {
+    color: gold;
+}
+
+/* Highlight stars on hover */
+.rate > label:hover,
+.rate > label:hover ~ label {
+    color:brown;
+}
+
+
+.rating-star i{
+    color: gold !important;
+}
