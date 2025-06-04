@@ -31,7 +31,6 @@ class Product(models.Model):
             avg = float(reviews['average'])
         return avg
 
-   
 
     def countReview(self):
         return ReviewRating.objects.filter(product=self, status=True).count()

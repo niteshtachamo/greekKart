@@ -1,9 +1,11 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} 
+{% load static %} 
+{% block content %}
 <section class="section-content padding-y bg">
   <div class="container">
     <h3 class="mb-10 text-center">Review Your Order</h3>
     <div class="row">
-      <aside class="col-lg-8">
+      <aside class="col-lg-8 order-lg-1">
         <!-- Billing Address Card -->
         <div class="card">
           <div class="card-header">Billing Address</div>
@@ -23,17 +25,21 @@
         </div>
 
         <!-- Payment Method Card -->
-        <div class="card">
-          <div class="card-header">Payment Method</div>
-          <div class="card-body">
-            <select id="payment-option" class="form-select">
-              <option disabled selected>Select Payment Option</option>
-              <option value="cod">Cash on Delivery</option>
-              <option value="khalti">Khalti</option>
-              <option value="stripe">Stripe</option>
-            </select>
-          </div>
-        </div>
+<div class="card mb-4">
+  <div class="card-header">Payment Method</div>
+  <div class="card-body">
+    <div class="mb-3">
+      <select id="payment-option" class="form-select py-2">
+        <option disabled selected>Select Payment Option</option>
+        <option value="cod">Cash on Delivery</option>
+        <option value="khalti">Khalti</option>
+        <option value="stripe">Stripe</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+
 
         <!-- Review Products Card -->
         <div class="card">
@@ -61,12 +67,13 @@
                         <a
                           href="{{ cart_item.product.get_url }}"
                           class="text-dark fw-semibold"
-                          >{{ cart_item.product.product_name }}</a
-                        ><br />
-                        <small class="text-muted">
-                          {% for item in cart_item.variations.all %} {{
-                          item.variation_category|capfirst }}: {{
-                          item.variation_value|capfirst }}<br />
+                        >
+                          {{ cart_item.product.product_name }}
+                        </a>
+                        <br />
+                        <small class="text-muted d-block">
+                          {% for item in cart_item.variations.all %}
+                            {{ item.variation_category|capfirst }}: {{ item.variation_value|capfirst }}{% if not forloop.last %}, {% endif %}
                           {% endfor %}
                         </small>
                       </div>
@@ -76,9 +83,7 @@
                   <td class="text-end">
                     <div>
                       <strong>Rs. {{ cart_item.sub_total }}</strong><br />
-                      <small class="text-muted"
-                        >Rs. {{ cart_item.product.price }} each</small
-                      >
+                      <small class="text-muted">Rs. {{ cart_item.product.price }} each</small>
                     </div>
                   </td>
                 </tr>
@@ -90,7 +95,7 @@
       </aside>
 
       <!-- Order Summary Card -->
-      <aside class="col-lg-4">
+      <aside class="col-lg-4 order-lg-2">
         <div class="card">
           <div class="card-body">
             <dl class="dlist-align">

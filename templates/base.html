@@ -67,5 +67,13 @@
   <body>
     {% include "includes/navbar.html" %} {% block content %} {% endblock %}
      {%include "includes/footer.html" %}
+
+
+     <script>
+    function submitPriceFilter() {
+        document.getElementById("price-filter-form").submit();
+    }
+</script>
+
   </body>
 </html>

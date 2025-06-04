@@ -6,6 +6,8 @@ from carts.views import _cart_id
 from django.http import HttpResponse
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from django.db.models import Q
+from store.models import Variation  # Make sure this is imported
+
 
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
@@ -14,63 +16,74 @@ from .models import ReviewRating
 from orders.models import OrderProduct
 # Create your views here.
 
+from django.core.paginator import Paginator
+from django.shortcuts import render, get_object_or_404
+from .models import Product, Category
+
 def store(request, category_slug=None):
     categories = None
-    products = None
-    
-    if category_slug != None:
+    products = Product.objects.filter(is_available=True)
+
+    # Category filtering
+    if category_slug is not None:
         categories = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(category=categories, is_available=True)
-        paginator=Paginator(products,3)
-        page=request.GET.get('page')
-        paged_products=paginator.get_page(page)
-        product_count = products.count()
-    else:
-        products = Product.objects.all().filter(is_available=True).order_by('id')
-        paginator=Paginator(products,3)
-        page=request.GET.get('page')
-        paged_products=paginator.get_page(page)
-        product_count=products.count()
-    
+        products = products.filter(category=categories)
+
+    # Price range filtering
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+
+    # Pagination
+    paginator = Paginator(products, 3)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+    product_count = products.count()
+
     context = {
         'products': paged_products,
-        'product_count':product_count,
+        'product_count': product_count,
     }
-    return render(request,'store/store.html',context)
+    return render(request, 'store/store.html', context)
+
 
 def product_detail(request, category_slug, product_slug):
     try:
         single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
-        in_cart =CartItem.objects.filter(cart__cart_id=_cart_id(request),product=single_product).exists()
-    
+        in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).exists()
     except Exception as e:
         raise e
-    
-    
+
     if request.user.is_authenticated:
-        try:
-            orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
-        except OrderProduct.DoesNotExist:
-            orderproduct = None
+        orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
     else:
-        orderproduct=None
-        
-    # reviews get
+        orderproduct = None
+
+    # Reviews
     reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
-    
-    #product gallery
+
+    # Product gallery
     product_gallery = ProductGalary.objects.filter(product_id=single_product.id)
-     
+
+    # ✅ Filter color and size variations
+    color_variations = Variation.objects.filter(product=single_product, variation_category='color', is_active=True)
+    size_variations = Variation.objects.filter(product=single_product, variation_category='size', is_active=True)
+
     context = {
         'single_product': single_product,
-        'in_cart':in_cart,
-        'orderproduct':orderproduct,
-        'reviews':reviews,
-        'product_gallery':product_gallery,
+        'in_cart': in_cart,
+        'orderproduct': orderproduct,
+        'reviews': reviews,
+        'product_gallery': product_gallery,
+        'colors': color_variations,  # ✅ Added
+        'sizes': size_variations,    # ✅ Added
     }
 
     return render(request, 'store/product_detail.html', context)
-
 
 def search(request):
     keyword = request.GET.get('keyword')

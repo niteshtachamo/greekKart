@@ -2,6 +2,7 @@ from django.contrib import admin
 from.models import Product,Variation,ReviewRating,ProductGalary
 import admin_thumbnails
 
+
 @admin_thumbnails.thumbnail('image')
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGalary
