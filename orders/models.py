@@ -63,7 +63,7 @@ class OrderProduct(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     variations = models.ManyToManyField(Variation, blank=True)  # For size, color, etc.
-    tax = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    tax = models.FloatField(default=0.0)    
     quantity = models.IntegerField()
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)

@@ -3,29 +3,69 @@
 
 {% block content %}
 <!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro padding-y-sm">
+<section class="section-intro py-5 ">
     <div class="container">
-        <div class="intro-banner-wrap rounded">
-            {% comment %} <img src="{% static 'images/banners/1.jpg' %}" class="img-fluid rounded"> {% endcomment %}
-            <div class="main-title center">
-                <h1 class="title">Banner</h1>
-                <p>Lorem ipsum dolor sit amet.</p>
+        <div class="intro-banner-wrap rounded overflow-hidden position-relative text-center bg-primary text-white p-5">
+            <img src="{% static 'images/banners/1.jpg' %}" class="img-fluid w-100 h-100 object-fit-cover position-absolute top-0 start-0" style="z-index: -1;"> 
+
+            <div class="position-relative z-1">
+                <h1 class="display-4 fw-bold">Welcome to GreatKart</h1>
+                <p class="lead">Explore the best deals and top-rated products now.</p>
+                <a href="{% url 'store' %}" class="btn btn-light btn-lg mt-3">Shop Now</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ========================= SECTION PRODUCTS ========================= -->
+
+<!-- ========================= SECTION HIGH RATING ========================= -->
 <section class="section-name padding-y-sm">
     <div class="container">
-
         <header class="section-heading">
-            <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
-            <h3 class="section-title">Popular products</h3>
+            <h3 class="section-title text-center">Top Rated Products</h3>
         </header>
-
         <div class="row">
-            {% if products %}
+            {% if high_rated_products %}
+                {% for product in high_rated_products %}
+                    <div class="col-md-3">
+                        <div class="card card-product-grid">
+                            <a href="{{ product.get_url }}" class="img-wrap">
+                                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                            </a>
+                            <figcaption class="info-wrap">
+                                <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                                <div class="price mt-1">Rs: {{ product.price }}</div>
+                                
+                                <div class="rating-star">
+                                    <span>
+                                        <i class="fa {% if product.avg_rating >= 1 %}fa-star{% elif product.avg_rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+                                        <i class="fa {% if product.avg_rating >= 2 %}fa-star{% elif product.avg_rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+                                        <i class="fa {% if product.avg_rating >= 3 %}fa-star{% elif product.avg_rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+                                        <i class="fa {% if product.avg_rating >= 4 %}fa-star{% elif product.avg_rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+                                        <i class="fa {% if product.avg_rating >= 5 %}fa-star{% elif product.avg_rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                            </figcaption>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No high-rated products available.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+
+
+<!-- ========================= SECTION Our  Products ========================= -->
+{% comment %} <section class="section-name padding-y-sm">
+    <div class="container">
+        <header class="section-heading">
+            <h3 class="section-title">Our Products</h3>
+        </header>
+        <div class="row">
+             {% if products %}
                 {% for product in products %}
                     <div class="col-md-3">
                         <div class="card card-product-grid">
@@ -45,8 +85,6 @@
                 <p>No products available.</p>
             {% endif %}
         </div>
-
     </div>
-</section>
-
+</section> {% endcomment %}
 {% endblock %}

@@ -317,38 +317,32 @@ def change_password(request):
         }
         return render(request, 'accounts/change_password.html', context)
     
-from decimal import Decimal
-
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, order_number=order_id)
     payment = order.payment
     order_items = OrderProduct.objects.filter(order=order)
 
-    subtotal = Decimal('0.00')
-    total_tax = Decimal('0.00')
+    subtotal = 0
+    quantity = 0
 
     for item in order_items:
-        price = Decimal(str(item.product_price))
-        quantity = item.quantity
-        item_total = price * quantity
-
-        tax = item_total * Decimal('0.13')  # assuming 13% tax
-
+        item_total = item.product_price * item.quantity
         subtotal += item_total
-        total_tax += tax
+        quantity += item.quantity
 
-        item.total = item_total + tax
-        item.tax = tax  # set dynamically for template use
+        # Set subtotal to each item for display
+        item.subtotal = round(item_total, 2)
 
-    grand_total = subtotal + total_tax
+    tax = round((2 * subtotal) / 100, 2)  # 2% flat tax
+    grand_total = round(subtotal + tax, 2)
 
     context = {
         'order_detail': order_items,
         'order': order,
         'payment': payment,
-        'subtotal': subtotal,
-        'total_tax': total_tax,
+        'subtotal': round(subtotal, 2),
+        'total_tax': tax,
         'grand_total': grand_total,
     }
 

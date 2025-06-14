@@ -39,51 +39,49 @@
                     <div class="invoice-items mt-4">
                         <div class="table-responsive">
                             <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Description</th>
-                                        <th class="text-center">Qty</th>
-                                        <th class="text-center">Unit Price</th>
-                                        <th class="text-center">Tax</th>
-                                        <th class="text-center">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in order_detail %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ item.product.product_name }}</strong>
-                                            {% if item.variations.all %}
-                                                <br>
-                                                <small>
-                                                    {% for variation in item.variations.all %}
-                                                        {{ variation.variation_category }}: {{ variation.variation_value }}{% if not forloop.last %}, {% endif %}
-                                                    {% endfor %}
-                                                </small>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">{{ item.quantity }}</td>
-                                        <td class="text-center">{{ item.product_price|floatformat:2 }}</td>
-                                        <td class="text-center">{{ item.tax|floatformat:2 }}</td>
-                                        <td class="text-center">{{ item.total|floatformat:2 }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="4" class="text-right">Subtotal:</th>
-                                        <th class="text-center">{{ subtotal|floatformat:2 }}</th>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4" class="text-right">Total Tax:</th>
-                                        <th class="text-center">{{ total_tax|floatformat:2 }}</th>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4" class="text-right">Grand Total:</th>
-                                        <th class="text-center">{{ grand_total|floatformat:2 }}</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+    <thead>
+        <tr>
+            <th class="text-center">Description</th>
+            <th class="text-center">Qty</th>
+            <th class="text-center">Unit Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order_detail %}
+        <tr>
+            <td>
+                <strong>{{ item.product.product_name }}</strong>
+                {% if item.variations.all %}
+                    <br>
+                    <small>
+                        {% for variation in item.variations.all %}
+                            {{ variation.variation_category }}: {{ variation.variation_value }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </small>
+                {% endif %}
+            </td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-center">{{ item.product_price|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="2" class="text-right">Subtotal:</th>
+            <th class="text-center">{{ subtotal|floatformat:2 }}</th>
+        </tr>
+        <tr>
+            <th colspan="2" class="text-right">Total Tax:</th>
+            <th class="text-center">{{ total_tax|floatformat:2 }}</th>
+        </tr>
+        <tr>
+            <th colspan="2" class="text-right">Grand Total:</th>
+            <th class="text-center">{{ grand_total|floatformat:2 }}</th>
+        </tr>
+    </tfoot>
+</table>
+
+
                         </div>
                     </div>
 

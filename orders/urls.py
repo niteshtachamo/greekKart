@@ -29,4 +29,7 @@ urlpatterns = [
 
     # Cash On Delivery order confirmation
     path('cod-order/', views.cod_order, name='cod_order'),
+    path('cod-success/', views.cod_success_page, name='cod_success_page'),
+
+
 ]

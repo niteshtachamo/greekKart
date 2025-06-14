@@ -287,14 +287,21 @@ def payment_success(request):
     del request.session['order_id']
 
 # Calculate tax for each ordered product (2% of product price)
-    for item in ordered_products:
-        item.tax = round(item.product_price * item.quantity * 0.02, 2)
+    total = 0
+    quantity = 0
+    for op in ordered_products:
+        total += (op.product_price * op.quantity)
+        quantity += op.quantity
+    tax = (2 * total) / 100
+
+
 
 # Context to pass to the template
     context = {
         'order': order,
         'payment': payment,
         'ordered_products': ordered_products,
+        'tax':tax,
     }
 
 # Return the rendered template
@@ -305,22 +312,56 @@ def stripe_cancel(request):
     return render(request, 'orders/stripecancel.html')
 
 
+
+
+
+from django.urls import reverse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from orders.models import Order
+
+from orders.models import Payment
+
 @csrf_exempt
 def cod_order(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             order_id = data.get('order_id')
+            if not order_id:
+                return JsonResponse({'error': 'Order ID is missing.'}, status=400)
 
             order = Order.objects.get(id=order_id)
+
+            # Create a Payment object for COD
+            payment = Payment.objects.create(
+                user=order.user,
+                payment_id=f'COD{order.order_number}',  # unique id for COD payment, can customize
+                payment_method='COD',
+                amount_paid=str(order.order_total),  # convert to string if field is CharField
+                status='completed'
+            )
+
+            # Link payment to order
+            order.payment = payment
             order.payment_method = 'COD'
-            order.payment_status = 'Pending'
+            order.payment_status = 'completed'
             order.is_ordered = True
             order.save()
 
-            return JsonResponse({'message': 'Cash on Delivery order placed successfully!'}, status=200)
+            # Clear cart items here (if needed)
+            CartItem.objects.filter(user=order.user).delete()
+
+            return JsonResponse({'success': True, 'redirect_url': reverse('cod_success_page')})
+
         except Order.DoesNotExist:
             return JsonResponse({'error': 'Order not found.'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def cod_success_page(request):
+    return render(request, 'orders/cod_success_page.html')
+
