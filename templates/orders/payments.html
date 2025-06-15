@@ -157,26 +157,34 @@
 
       // Handle payment methods
       if (paymentMethod === "cod") {
+
         console.log("Processing COD order");
-        fetch("/cod-order/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-          },
-          body: JSON.stringify({ order_id: orderId }),
-        })
-          .then((response) => {
-            console.log("COD response status:", response.status);
-            if (response.ok) {
-              window.location.href = "/order-confirmation/";
-            } else {
-              alert("Failed to place COD order.");
-            }
-          })
-          .catch((error) => {
-            console.error("COD fetch error:", error);
-          });
+        fetch('/orders/cod-order/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ order_id: orderId })
+})
+.then(res => res.json())
+.then(data => {
+    if (data.success && data.redirect_url) {
+        window.location.href = data.redirect_url; // ✅ Go to COD success page
+    } else if (data.error) {
+        alert("❌ " + data.error);
+    } else {
+        alert("Something went wrong. Please try again.");
+    }
+})
+.catch(error => {
+    console.error("COD fetch error:", error);
+    alert("Network error or server not responding.");
+});
+
+
+
+
+
       } else if (paymentMethod === "khalti") {
         console.log("khalti select"); // Should now log
         window.location.href = `/orders/khalti-request/?o_id=${orderId}`;
