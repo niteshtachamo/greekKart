@@ -5,11 +5,15 @@ from decimal import Decimal
 
 # Create your models here.
 class Payment(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+    )
     user=models.ForeignKey(Account,on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=100, primary_key=True)
     payment_method = models.CharField(max_length=100)
     amount_paid=models.CharField(max_length=50)
-    status=models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending', blank=False)
     created_at=models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

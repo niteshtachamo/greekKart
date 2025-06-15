@@ -16,7 +16,10 @@ from .models import Order, Payment, OrderProduct
 from carts.models import CartItem
 from store.models import Product
 
+from django.urls import reverse
+
 import stripe
+
 
 
 def payments(request):
@@ -315,43 +318,35 @@ def stripe_cancel(request):
 
 
 
-from django.urls import reverse
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from orders.models import Order
-
-from orders.models import Payment
-
 @csrf_exempt
 def cod_order(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             order_id = data.get('order_id')
+
             if not order_id:
                 return JsonResponse({'error': 'Order ID is missing.'}, status=400)
 
             order = Order.objects.get(id=order_id)
 
-            # Create a Payment object for COD
+            # Create payment entry for COD, status pending
             payment = Payment.objects.create(
                 user=order.user,
-                payment_id=f'COD{order.order_number}',  # unique id for COD payment, can customize
+                payment_id=f'COD_{order_id}',
                 payment_method='COD',
-                amount_paid=str(order.order_total),  # convert to string if field is CharField
-                status='completed'
+                amount_paid=str(order.order_total),
+                status='Pending',
             )
 
-            # Link payment to order
+            # Link payment to order, but DO NOT move cart or reduce stock here
             order.payment = payment
             order.payment_method = 'COD'
-            order.payment_status = 'completed'
+            order.payment_status = 'Pending'
             order.is_ordered = True
             order.save()
 
-            # Clear cart items here (if needed)
-            CartItem.objects.filter(user=order.user).delete()
-
+            
             return JsonResponse({'success': True, 'redirect_url': reverse('cod_success_page')})
 
         except Order.DoesNotExist:
