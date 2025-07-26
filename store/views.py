@@ -80,6 +80,9 @@ def product_detail(request, category_slug, product_slug):
     color_variations = Variation.objects.filter(product=single_product, variation_category='color', is_active=True)
     size_variations = Variation.objects.filter(product=single_product, variation_category='size', is_active=True)
 
+    # Related products: same category, exclude current product
+    related_products = Product.objects.filter(category=single_product.category).exclude(id=single_product.id)[:4]
+
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
@@ -88,6 +91,7 @@ def product_detail(request, category_slug, product_slug):
         'product_gallery': product_gallery,
         'colors': color_variations,
         'sizes': size_variations,
+        'related_products': related_products,
     }
 
     return render(request, 'store/product_detail.html', context)
