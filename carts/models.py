@@ -20,8 +20,26 @@ class CartItem(models.Model):
     is_active = models.BooleanField(default=True)
 
     def sub_total(self):
-        # Returns the total cost for this cart item (product price * quantity)
-        return self.product.price * self.quantity
+        # Returns the total cost for this cart item (product price * size * quantity)
+        size = 1
+        size_variation = self.variations.filter(variation_category__iexact='size').first()
+        if size_variation:
+            try:
+                size = int(size_variation.variation_value)
+            except (ValueError, TypeError):
+                size = 1  # fallback if not an integer
+        return self.product.price * size * self.quantity
+
+    @property
+    def unit_price_with_size(self):
+        size = 1
+        size_variation = self.variations.filter(variation_category__iexact='size').first()
+        if size_variation:
+            try:
+                size = int(size_variation.variation_value)
+            except (ValueError, TypeError):
+                size = 1
+        return self.product.price * size
 
     def __unicode__(self):
         return self.product

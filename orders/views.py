@@ -73,7 +73,7 @@ def place_order(request, total=0, quantity=0):
     grand_total = 0
     tax = 0
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
+        total += cart_item.sub_total()
         quantity += cart_item.quantity
     tax = (2 * total) / 100
     grand_total = total + tax
@@ -404,7 +404,13 @@ def cod_order(request):
             order.is_ordered = True
             order.save()
 
-            
+            # Store order ID in session for success page
+            request.session['cod_order_id'] = order.id
+
+            # Clear the user's cart after successful COD order
+            from carts.models import CartItem
+            CartItem.objects.filter(user=order.user).delete()
+
             return JsonResponse({'success': True, 'redirect_url': reverse('cod_success_page')})
 
         except Order.DoesNotExist:
@@ -416,5 +422,12 @@ def cod_order(request):
 
 
 def cod_success_page(request):
-    return render(request, 'orders/cod_success_page.html')
+    order_id = request.session.get('cod_order_id')
+    order = None
+    if order_id:
+        from .models import Order
+        order = Order.objects.filter(id=order_id).first()
+        # Optionally, remove the session variable after use
+        del request.session['cod_order_id']
+    return render(request, 'orders/cod_success_page.html', {'order': order})
 

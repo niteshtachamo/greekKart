@@ -60,7 +60,7 @@
 
             <!-- Color Options -->
             <!-- Color Options -->
-<div class="mb-3">
+{% comment %} <div class="mb-3">
   <h6>Choose Color</h6>
   <select name="color" class="form-control" required>
     <option value="" disabled selected>--Select Color--</option>
@@ -68,15 +68,15 @@
       <option value="{{ color.variation_value|lower }}">{{ color.variation_value|capfirst }}</option>
     {% endfor %}
   </select>
-</div>
+</div> {% endcomment %}
 
 <!-- Size Selection -->
 <div class="mb-3">
-  <h6>Choose Size</h6>
+  <h6>Choose Size (in lt)</h6>
   <select name="size" class="form-control" required>
     <option value="" disabled selected>--Select Size--</option>
     {% for size in sizes %}
-      <option value="{{ size.variation_value|lower }}">{{ size.variation_value|capfirst }}</option>
+      <option value="{{ size.variation_value|lower }}">{{ size.variation_value|capfirst }} lt</option>
     {% endfor %}
   </select>
 </div>

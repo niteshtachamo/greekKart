@@ -146,7 +146,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
 
         for cart_item in cart_items:
-            total += (cart_item.product.price * cart_item.quantity)
+            total += cart_item.sub_total()
             quantity += cart_item.quantity
 
         tax = (2 * total) / 100
