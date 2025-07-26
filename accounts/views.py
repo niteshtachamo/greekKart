@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.core.paginator import Paginator
 
 from decimal import Decimal
 import requests
@@ -22,7 +23,6 @@ from accounts.forms import RegistrationForm, UserForm, UserProfileForm
 from carts.models import Cart, CartItem
 from carts.views import _cart_id
 from orders.models import Order, OrderProduct
-
 
 # ================== USER AUTHENTICATION VIEWS ==================
 
@@ -220,7 +220,12 @@ def change_password(request):
 
 @login_required
 def my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    orders_qs = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    
+    paginator = Paginator(orders_qs, 5)  # 5 orders per page
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+
     context = {'orders': orders}
     return render(request, 'accounts/my_orders.html', context)
 

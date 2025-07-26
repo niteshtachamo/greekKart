@@ -131,29 +131,71 @@ class KhaltiRequestView(View):
     def get(self, request, *args, **kwargs):
         o_id = request.GET.get("o_id")
         order = get_object_or_404(Order, id=o_id, user=request.user, is_ordered=False)
-        return render(request, "orders/khaltirequest.html", {"order": order})
+
+        # Khalti payment request data
+        url = "https://a.khalti.com/api/v2/epayment/initiate/"
+        payload = {
+            "return_url": request.build_absolute_uri(f"/orders/khalti-verify/?order_id={order.id}"),
+            "website_url": request.build_absolute_uri("/"),
+            "amount": int(order.order_total * 100),  # Khalti expects amount in paisa
+            "purchase_order_id": str(order.id),
+            "purchase_order_name": f"Order {order.order_number}",
+        }
+        headers = {
+            "Authorization": f"Key {settings.KHALTI_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        # Make the API request to Khalti
+        response = requests.post(url, json=payload, headers=headers)
+        data = response.json()
+
+        # If payment_url is returned, redirect user to Khalti page
+        payment_url = data.get("payment_url")
+        if payment_url:
+            return redirect(payment_url)
+        else:
+            # If error, render a payment error page
+            return render(request, "orders/payment_error.html", {
+                "error": data.get("detail", "Failed to initiate Khalti payment.")
+            })
 
 
 class KhaltiVerifyView(View):
     def get(self, request, *args, **kwargs):
-        token = request.GET.get("token")
-        amount = request.GET.get("amount")
+        pidx = request.GET.get("pidx")
         o_id = request.GET.get("order_id")
 
-        url = "https://khalti.com/api/v2/payment/verify/"
-        payload = {"token": token, "amount": amount}
-        headers = {"Authorization": f"Key {settings.KHALTI_SECRET_KEY}"}
+        # Khalti payment lookup API endpoint
+        url = "https://a.khalti.com/api/v2/epayment/lookup/"
+        payload = {
+            "pidx": pidx
+        }
+        headers = {
+            "Authorization": f"Key {settings.KHALTI_SECRET_KEY}"
+        }
 
+        # Get the order for current user
         order = get_object_or_404(Order, id=o_id, user=request.user)
-        response = requests.post(url, data=payload, headers=headers)
+
+        # Call Khalti API to verify payment
+        response = requests.post(url, json=payload, headers=headers)
         resp_dict = response.json()
 
-        if resp_dict.get("idx"):
+        if resp_dict.get("status") == "Completed":
+            # Mark order as paid
             order.payment_completed = True
+            order.is_ordered = True  # mark as ordered
             order.save()
-            return JsonResponse({"success": True})
+
+            # Save order_id in session for payment_success view
+            request.session['order_id'] = order.id
+
+            return redirect('payment_success')
         else:
-            return JsonResponse({"success": False})
+            # Return JSON error response if payment not completed
+            return JsonResponse({"success": False, "error": resp_dict})
+
 
 
 @csrf_exempt
@@ -236,26 +278,45 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
+@login_required
 def payment_success(request):
     order_id = request.session.get('order_id')
     if not order_id:
         return redirect('store')
 
-    order = get_object_or_404(Order, id=order_id, user=request.user, is_ordered=False)
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    if not Payment.objects.filter(payment_id__startswith='stripe_', order=order).exists():
-        payment = Payment.objects.create(
-            user=request.user,
-            payment_id=f"stripe_{order.order_number}",
-            payment_method='Stripe',
-            amount_paid=order.order_total,
-            status='Completed',
-        )
+    # Check if payment exists
+    payment = Payment.objects.filter(order=order).first()
+
+    if not payment:
+        # No payment recorded yet - create based on order.is_ordered and payment method
+
+        # For example, if order.is_ordered is False, treat as Stripe (adjust if needed)
+        if not order.is_ordered:
+            payment = Payment.objects.create(
+                user=request.user,
+                payment_id=f"stripe_{order.order_number}",
+                payment_method='Stripe',
+                amount_paid=order.order_total,
+                status='Completed',
+            )
+            order.is_ordered = False  # or True if you want here
+        else:
+            # order.is_ordered == True, treat as Khalti
+            payment = Payment.objects.create(
+                user=request.user,
+                payment_id=f"khalti_{order.order_number}",
+                payment_method='Khalti',
+                amount_paid=order.order_total,
+                status='Completed',
+            )
+            order.is_ordered = True
 
         order.payment = payment
-        order.is_ordered = True
         order.save()
 
+        # Move cart items to order products only once
         cart_items = CartItem.objects.filter(user=request.user)
         for item in cart_items:
             order_product = OrderProduct.objects.create(
@@ -275,7 +336,7 @@ def payment_success(request):
 
         cart_items.delete()
 
-        mail_subject = 'Thank you for the ordering.'
+        mail_subject = 'Thank you for your order.'
         message = render_to_string('orders/order_received_email.html', {
             'user': request.user,
             'order': order,
@@ -284,30 +345,27 @@ def payment_success(request):
         send_email = EmailMessage(mail_subject, message, to=[to_email])
         send_email.send()
 
-        ordered_products = OrderProduct.objects.filter(order=order)
+    else:
+        # Payment already exists, just fetch ordered products
+        payment = payment
 
-    # Remove the session variable after successful order
-    del request.session['order_id']
+    ordered_products = OrderProduct.objects.filter(order=order)
 
-# Calculate tax for each ordered product (2% of product price)
-    total = 0
-    quantity = 0
-    for op in ordered_products:
-        total += (op.product_price * op.quantity)
-        quantity += op.quantity
+    # Remove session var
+    if 'order_id' in request.session:
+        del request.session['order_id']
+
+    # Calculate tax
+    total = sum(op.product_price * op.quantity for op in ordered_products)
     tax = (2 * total) / 100
 
-
-
-# Context to pass to the template
     context = {
         'order': order,
         'payment': payment,
         'ordered_products': ordered_products,
-        'tax':tax,
+        'tax': tax,
     }
 
-# Return the rendered template
     return render(request, 'orders/paymentsuccess.html', context)
 
 

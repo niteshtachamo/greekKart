@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="text-danger">Payment Error</h2>
+    <p>{{ message }}</p>
+    <a href="{% url 'store' %}" class="btn btn-primary">Back to Store</a>
+  </div>
+{% endblock %}
