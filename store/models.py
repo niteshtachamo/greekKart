@@ -37,6 +37,68 @@ class Product(models.Model):
     def countReview(self):
         return ReviewRating.objects.filter(product=self, status=True).count()
 
+    def get_recommended_products(self, user=None, limit=4):
+        """
+        Get recommended products using collaborative filtering
+        Based on users who bought similar products
+        """
+        from orders.models import OrderProduct
+        from django.db.models import Count, Q
+        from django.contrib.auth.models import User
+        
+        if not user or not user.is_authenticated:
+            # For non-authenticated users, return popular products
+            return Product.objects.filter(is_available=True).order_by('-click_count')[:limit]
+        
+        # Get products this user has purchased
+        user_purchases = OrderProduct.objects.filter(
+            user=user, 
+            ordered=True
+        ).values_list('product_id', flat=True)
+        
+        if not user_purchases:
+            # If user has no purchase history, return popular products
+            return Product.objects.filter(is_available=True).order_by('-click_count')[:limit]
+        
+        # Find users who bought the same products as current user
+        similar_users = OrderProduct.objects.filter(
+            product_id__in=user_purchases,
+            ordered=True
+        ).exclude(user=user).values_list('user_id', flat=True).distinct()
+        
+        if not similar_users:
+            # If no similar users, return popular products
+            return Product.objects.filter(is_available=True).order_by('-click_count')[:limit]
+        
+        # Get products bought by similar users but not by current user
+        recommended_products = OrderProduct.objects.filter(
+            user_id__in=similar_users,
+            ordered=True
+        ).exclude(
+            product_id__in=user_purchases
+        ).values('product_id').annotate(
+            purchase_count=Count('product_id')
+        ).order_by('-purchase_count')[:limit]
+        
+        # Get the actual product objects
+        product_ids = [item['product_id'] for item in recommended_products]
+        products = Product.objects.filter(
+            id__in=product_ids,
+            is_available=True
+        )
+        
+        # If we don't have enough recommendations, fill with popular products
+        if products.count() < limit:
+            remaining_count = limit - products.count()
+            popular_products = Product.objects.filter(
+                is_available=True
+            ).exclude(
+                id__in=product_ids
+            ).order_by('-click_count')[:remaining_count]
+            products = list(products) + list(popular_products)
+        
+        return products[:limit]
+    
     
 class VariationManager(models.Manager):
     def colors(self):

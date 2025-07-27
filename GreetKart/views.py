@@ -19,8 +19,12 @@ def home(request):
     # Most Clicked Products
     most_clicked_products = products.order_by('-click_count')[:8]
 
+    # Recommended Products using collaborative filtering
+    recommended_products = Product.objects.first().get_recommended_products(request.user, limit=8)
+
     context = {
         'high_rated_products': high_rated_products,
         'most_clicked_products': most_clicked_products,
+        'recommended_products': recommended_products,
     }
     return render(request, 'home.html', context)

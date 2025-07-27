@@ -1,90 +1,168 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 <!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro py-5 ">
-    <div class="container">
-        <div class="intro-banner-wrap rounded overflow-hidden position-relative text-center bg-primary text-white p-5">
-            <img src="{% static 'images/banners/1.jpg' %}" class="img-fluid w-100 h-100 object-fit-cover position-absolute top-0 start-0" style="z-index: -1;"> 
+<section class="section-intro py-5">
+  <div class="container">
+    <div
+      class="intro-banner-wrap rounded overflow-hidden position-relative text-center bg-primary text-white p-5"
+    >
+      <img
+        src="{% static 'images/banners/1.jpg' %}"
+        class="img-fluid w-100 h-100 object-fit-cover position-absolute top-0 start-0"
+        style="z-index: -1"
+      />
 
-            <div class="position-relative z-1">
-                <h1 class="display-4 fw-bold">Welcome to GreatKart</h1>
-                <p class="lead">Explore the best deals and top-rated products now.</p>
-                <a href="{% url 'store' %}" class="btn btn-light btn-lg mt-3">Shop Now</a>
-            </div>
-        </div>
+      <div class="position-relative z-1">
+        <h1 class="display-4 fw-bold">Welcome to GreatKart</h1>
+        <p class="lead">Explore the best deals and top-rated products now.</p>
+        <a href="{% url 'store' %}" class="btn btn-light btn-lg mt-3"
+          >Shop Now</a
+        >
+      </div>
     </div>
+  </div>
 </section>
-
 
 <!-- ========================= SECTION HIGH RATING ========================= -->
 <section class="section-name padding-y-sm">
-    <div class="container">
-        <header class="section-heading">
-            <h3 class="section-title text-center">Top Rated Products</h3>
-        </header>
-        <div class="row">
-            {% if high_rated_products %}
-                {% for product in high_rated_products %}
-                    <div class="col-md-3">
-                        <div class="card card-product-grid">
-                            <a href="{{ product.get_url }}" class="img-wrap">
-                                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
-                            </a>
-                            <figcaption class="info-wrap">
-                                <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-                                <div class="price mt-1">Rs: {{ product.price }}</div>
-                                
-                                <div class="rating-star">
-                                    <span>
-                                        <i class="fa {% if product.avg_rating >= 1 %}fa-star{% elif product.avg_rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
-                                        <i class="fa {% if product.avg_rating >= 2 %}fa-star{% elif product.avg_rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
-                                        <i class="fa {% if product.avg_rating >= 3 %}fa-star{% elif product.avg_rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
-                                        <i class="fa {% if product.avg_rating >= 4 %}fa-star{% elif product.avg_rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
-                                        <i class="fa {% if product.avg_rating >= 5 %}fa-star{% elif product.avg_rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                            </figcaption>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p class="text-center">No high-rated products available.</p>
-            {% endif %}
+  <div class="container">
+    <header class="section-heading">
+      <h3 class="section-title text-center">Top Rated Products</h3>
+    </header>
+    <div class="row">
+      {% if high_rated_products %} {% for product in high_rated_products %}
+      <div class="col-md-3">
+        <div class="card card-product-grid">
+          <a href="{{ product.get_url }}" class="img-wrap">
+            <img
+              src="{{ product.images.url }}"
+              alt="{{ product.product_name }}"
+            />
+          </a>
+          <figcaption class="info-wrap">
+            <a href="{{ product.get_url }}" class="title"
+              >{{ product.product_name }}</a
+            >
+            <div class="price mt-1">Rs: {{ product.price }}</div>
+
+            <div class="rating-star">
+              <span>
+                <i
+                  class="fa {% if product.avg_rating >= 1 %}fa-star{% elif product.avg_rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.avg_rating >= 2 %}fa-star{% elif product.avg_rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.avg_rating >= 3 %}fa-star{% elif product.avg_rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.avg_rating >= 4 %}fa-star{% elif product.avg_rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.avg_rating >= 5 %}fa-star{% elif product.avg_rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+              </span>
+            </div>
+          </figcaption>
         </div>
+      </div>
+      {% endfor %} {% else %}
+      <p class="text-center">No high-rated products available.</p>
+      {% endif %}
     </div>
+  </div>
 </section>
 
+<!-- ========================= SECTION RECOMMENDED PRODUCTS ========================= -->
+<section class="section-name padding-y-sm">
+  <div class="container">
+    <header class="section-heading">
+      <h3 class="section-title text-center">Recommended for You</h3>
+    </header>
+    <div class="row">
+      {% if recommended_products %} {% for product in recommended_products %}
+      <div class="col-md-3">
+        <div class="card card-product-grid">
+          <a href="{{ product.get_url }}" class="img-wrap">
+            <img
+              src="{{ product.images.url }}"
+              alt="{{ product.product_name }}"
+            />
+          </a>
+          <figcaption class="info-wrap">
+            <a href="{{ product.get_url }}" class="title"
+              >{{ product.product_name }}</a
+            >
+            {% comment %} <div class="price mt-1">Rs: {{ product.price }}</div> {% endcomment %}
 
+            {% comment %} <div class="rating-star">
+              <span>
+                <i
+                  class="fa {% if product.rating >= 1 %}fa-star{% elif product.rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.rating >= 2 %}fa-star{% elif product.rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.rating >= 3 %}fa-star{% elif product.rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.rating >= 4 %}fa-star{% elif product.rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+                <i
+                  class="fa {% if product.rating >= 5 %}fa-star{% elif product.rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                  aria-hidden="true"
+                ></i>
+              </span>
+            </div> {% endcomment %}
+          </figcaption>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <p class="text-center">No recommendations available.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
 
 <!-- ========================= SECTION Our  Products ========================= -->
-{% comment %} <section class="section-name padding-y-sm">
-    <div class="container">
-        <header class="section-heading">
-            <h3 class="section-title">Our Products</h3>
-        </header>
-        <div class="row">
-             {% if products %}
-                {% for product in products %}
-                    <div class="col-md-3">
-                        <div class="card card-product-grid">
-                            <a href="{{ product.get_url }}" class="img-wrap">
-                                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
-                            </a>
-                            <figcaption class="info-wrap">
-                                <a href="{{ product.get_url }}" class="title">
-                                    {{ product.product_name }}
-                                </a>
-                                <div class="price mt-1">Rs: {{ product.price }}</div>
-                            </figcaption>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No products available.</p>
-            {% endif %}
+{% comment %}
+<section class="section-name padding-y-sm">
+  <div class="container">
+    <header class="section-heading">
+      <h3 class="section-title">Our Products</h3>
+    </header>
+    <div class="row">
+      {% if products %} {% for product in products %}
+      <div class="col-md-3">
+        <div class="card card-product-grid">
+          <a href="{{ product.get_url }}" class="img-wrap">
+            <img
+              src="{{ product.images.url }}"
+              alt="{{ product.product_name }}"
+            />
+          </a>
+          <figcaption class="info-wrap">
+            <a href="{{ product.get_url }}" class="title">
+              {{ product.product_name }}
+            </a>
+            <div class="price mt-1">Rs: {{ product.price }}</div>
+          </figcaption>
         </div>
+      </div>
+      {% endfor %} {% else %}
+      <p>No products available.</p>
+      {% endif %}
     </div>
-</section> {% endcomment %}
-{% endblock %}
+  </div>
+</section>
+{% endcomment %} {% endblock %}
