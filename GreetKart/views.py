@@ -8,7 +8,7 @@ def home(request):
     # Top Rated Products (with reviews only)
     high_rated_products = Product.objects.filter(
         is_available=True,
-        reviewrating__status=True  # only approved reviews
+        reviewrating__status=True
     ).annotate(
         avg_rating=Avg('reviewrating__rating'),
         review_count=Count('reviewrating')
@@ -20,7 +20,11 @@ def home(request):
     most_clicked_products = products.order_by('-click_count')[:8]
 
     # Recommended Products using collaborative filtering
-    recommended_products = Product.objects.first().get_recommended_products(request.user, limit=8)
+    first_product = Product.objects.first()
+    if first_product:
+        recommended_products = first_product.get_recommended_products(request.user, limit=8)
+    else:
+        recommended_products = Product.objects.none()  # empty queryset
 
     context = {
         'high_rated_products': high_rated_products,

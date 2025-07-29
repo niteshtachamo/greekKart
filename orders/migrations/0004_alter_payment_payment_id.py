@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='payment_id',
-            field=models.CharField(primary_key=True, serialize=False),
+            field=models.CharField(max_length=100, primary_key=True, serialize=False),
         ),
     ]
