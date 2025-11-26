@@ -8,6 +8,7 @@ from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from django.db.models import Q
 from store.models import Variation  # Make sure this is imported
 from django.db.models import Avg, Count
+from store.models import Product  
 
 
 
@@ -57,8 +58,6 @@ def store(request, category_slug=None):
 def product_detail(request, category_slug, product_slug):
     try:
         single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
-        # ✅ Increase click count
-        single_product.click_count += 1
         single_product.save()
 
         in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).exists()
@@ -77,7 +76,6 @@ def product_detail(request, category_slug, product_slug):
     product_gallery = ProductGalary.objects.filter(product_id=single_product.id)
 
     # Filter color and size variations
-    color_variations = Variation.objects.filter(product=single_product, variation_category='color', is_active=True)
     size_variations = Variation.objects.filter(product=single_product, variation_category='size', is_active=True)
 
     # Related products: same category, exclude current product
@@ -89,7 +87,6 @@ def product_detail(request, category_slug, product_slug):
         'orderproduct': orderproduct,
         'reviews': reviews,
         'product_gallery': product_gallery,
-        'colors': color_variations,
         'sizes': size_variations,
         'related_products': related_products,
     }
@@ -100,7 +97,7 @@ def product_detail(request, category_slug, product_slug):
 def search(request):
     keyword = request.GET.get('keyword')
 
-    if keyword:  # Check if keyword is not None and not empty
+    if keyword:  
         products = Product.objects.order_by('-created_date').filter(
             Q(description__icontains=keyword) | Q(product_name__icontains=keyword)
         )
@@ -116,7 +113,6 @@ def search(request):
     return render(request, 'store/store.html', context)
 
 
-from store.models import Product  # import Product model if not already
 
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')

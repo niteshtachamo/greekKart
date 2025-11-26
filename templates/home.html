@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% load static %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
 <!-- ========================= SECTION MAIN ========================= -->
 <section class="section-intro py-5">
   <div class="container">
@@ -29,140 +31,113 @@
       <h3 class="section-title text-center">Top Rated Products</h3>
     </header>
     <div class="row">
-      {% if high_rated_products %} {% for product in high_rated_products %}
-      <div class="col-md-3">
-        <div class="card card-product-grid">
-          <a href="{{ product.get_url }}" class="img-wrap">
-            <img
-              src="{{ product.images.url }}"
-              alt="{{ product.product_name }}"
-            />
-          </a>
-          <figcaption class="info-wrap">
-            <a href="{{ product.get_url }}" class="title"
-              >{{ product.product_name }}</a
-            >
-            <div class="price mt-1">Rs: {{ product.price }}</div>
+      {% if high_rated_products %}
+        {% for product in high_rated_products %}
+        <div class="col-md-3">
+          <div class="card card-product-grid">
+            <a href="{{ product.get_url }}" class="img-wrap">
+              <img
+                src="{{ product.images.url }}"
+                alt="{{ product.product_name }}"
+              />
+            </a>
+            <figcaption class="info-wrap">
+              <a href="{{ product.get_url }}" class="title"
+                >{{ product.product_name }}</a
+              >
+              <div class="price mt-1">Rs: {{ product.price }}</div>
 
-            <div class="rating-star">
-              <span>
-                <i
-                  class="fa {% if product.avg_rating >= 1 %}fa-star{% elif product.avg_rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.avg_rating >= 2 %}fa-star{% elif product.avg_rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.avg_rating >= 3 %}fa-star{% elif product.avg_rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.avg_rating >= 4 %}fa-star{% elif product.avg_rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.avg_rating >= 5 %}fa-star{% elif product.avg_rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-              </span>
-            </div>
-          </figcaption>
+              <div class="rating-star">
+                <span>
+                  <i
+                    class="fa {% if product.avg_rating >= 1 %}fa-star{% elif product.avg_rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    class="fa {% if product.avg_rating >= 2 %}fa-star{% elif product.avg_rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    class="fa {% if product.avg_rating >= 3 %}fa-star{% elif product.avg_rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    class="fa {% if product.avg_rating >= 4 %}fa-star{% elif product.avg_rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    class="fa {% if product.avg_rating >= 5 %}fa-star{% elif product.avg_rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </div>
+            </figcaption>
+          </div>
         </div>
-      </div>
-      {% endfor %} {% else %}
-      <p class="text-center">No high-rated products available.</p>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">No high-rated products available.</p>
       {% endif %}
     </div>
   </div>
 </section>
+
+<!-- ========================= SECTION TRENDING PRODUCTS ========================= -->
+<section class="section-name padding-y-sm">
+  <div class="container">
+    <header class="section-heading">
+      <h3 class="section-title text-center">Trending Products (7 Days)</h3>
+    </header>
+    <div class="row">
+      {% if trending_products %}
+        {% for product in trending_products %}
+        <div class="col-md-3">
+          <div class="card card-product-grid">
+            <a href="{{ product.get_url }}" class="img-wrap">
+              <img src="{{ product.images.url }}" alt="{{ product.product_name }}" />
+            </a>
+            <figcaption class="info-wrap">
+              <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+              <div class="price mt-1">Rs: {{ product.price }}</div>
+            </figcaption>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">No trending products found in the last 7 days.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+<!-- ========================= END Trending Products ========================= -->
 
 <!-- ========================= SECTION RECOMMENDED PRODUCTS ========================= -->
 <section class="section-name padding-y-sm">
   <div class="container">
     <header class="section-heading">
-      <h3 class="section-title text-center">Recommended for You</h3>
+      <h3 class="section-title text-center">Recommended For You</h3>
     </header>
     <div class="row">
-      {% if recommended_products %} {% for product in recommended_products %}
-      <div class="col-md-3">
-        <div class="card card-product-grid">
-          <a href="{{ product.get_url }}" class="img-wrap">
-            <img
-              src="{{ product.images.url }}"
-              alt="{{ product.product_name }}"
-            />
-          </a>
-          <figcaption class="info-wrap">
-            <a href="{{ product.get_url }}" class="title"
-              >{{ product.product_name }}</a
-            >
-            {% comment %} <div class="price mt-1">Rs: {{ product.price }}</div> {% endcomment %}
-
-            {% comment %} <div class="rating-star">
-              <span>
-                <i
-                  class="fa {% if product.rating >= 1 %}fa-star{% elif product.rating >= 0.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.rating >= 2 %}fa-star{% elif product.rating >= 1.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.rating >= 3 %}fa-star{% elif product.rating >= 2.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.rating >= 4 %}fa-star{% elif product.rating >= 3.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-                <i
-                  class="fa {% if product.rating >= 5 %}fa-star{% elif product.rating >= 4.5 %}fa-star-half-o{% else %}fa-star-o{% endif %}"
-                  aria-hidden="true"
-                ></i>
-              </span>
-            </div> {% endcomment %}
-          </figcaption>
-        </div>
-      </div>
-      {% endfor %} {% else %}
-      <p class="text-center">No recommendations available.</p>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-<!-- ========================= SECTION Our  Products ========================= -->
-{% comment %}
-<section class="section-name padding-y-sm">
-  <div class="container">
-    <header class="section-heading">
-      <h3 class="section-title">Our Products</h3>
-    </header>
-    <div class="row">
-      {% if products %} {% for product in products %}
-      <div class="col-md-3">
-        <div class="card card-product-grid">
-          <a href="{{ product.get_url }}" class="img-wrap">
-            <img
-              src="{{ product.images.url }}"
-              alt="{{ product.product_name }}"
-            />
-          </a>
-          <figcaption class="info-wrap">
-            <a href="{{ product.get_url }}" class="title">
-              {{ product.product_name }}
+      {% if recommended_products %}
+        {% for product in recommended_products %}
+        <div class="col-md-3">
+          <div class="card card-product-grid">
+            <a href="{{ product.get_url }}" class="img-wrap">
+              <img src="{{ product.images.url }}" alt="{{ product.product_name }}" />
             </a>
-            <div class="price mt-1">Rs: {{ product.price }}</div>
-          </figcaption>
+            <figcaption class="info-wrap">
+              <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+              <div class="price mt-1">Rs: {{ product.price }}</div>
+            </figcaption>
+          </div>
         </div>
-      </div>
-      {% endfor %} {% else %}
-      <p>No products available.</p>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">No recommendations available.</p>
       {% endif %}
     </div>
   </div>
 </section>
-{% endcomment %} {% endblock %}
+<!-- ========================= END Recommended Products ========================= -->
+
+{% endblock %}
